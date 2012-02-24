@@ -13,12 +13,17 @@ var Connection;
 Connection = Server.CreateObject("ADODB.Connection");
 Connection.ConnectionString = "DRIVER=SQLite3 ODBC Driver;Database=C:\\общая\\exampleASP\\mydb.db;LongNames=0;Timeout=1000;NoTXN=0;SyncPragma=NORMAL;StepAPI=0";
 Connection.Open();
-//conn.execute("CREATE TABLE tblAdrs ( Id INTEGER , Name VARCHAR( 100 ) )");
+//Connection.execute("CREATE TABLE tblAdrs ( Id INTEGER , Name VARCHAR( 100 ) )");
 Connection.execute("INSERT INTO tblAdrs Values( 1, 'Abel' )");
+
+
 var Recordset = Connection.Execute("select * from tblAdrs");
-var itemfields=Recordset.Fields.Item(1);
-//Response.Write(itemfields.GetChunk());
+Recordset.MoveFirst();
+Response.Write("1");
+Response.Write("nmae "+Recordset.fields(0).name+"value "+Recordset.fields(0).value);
+
 Connection.close
+
 Response.Write("</body> </html>");
 
 %>

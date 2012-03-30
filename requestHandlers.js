@@ -3,59 +3,69 @@ var fs = require("fs");
 var dust = require('dust');
 var sqlite3 = require('sqlite3').verbose();
 
-
+var opCount = 0;
+var content ="";
+var resp;
 function start(response) {
 
-
-    //var Connection;
-    //Connection = Server.CreateObject("ADODB.Connection");
-    //Connection.ConnectionString = "DRIVER=SQLite3 ODBC Driver;Database=C:\\общая\\exampleASP2\\stud.s3db;LongNames=0;Timeout=1000;NoTXN=0;SyncPragma=NORMAL;StepAPI=0";
-    //Connection.Open();
-
-    //var Recordset = Connection.Execute("select * from students");
-    //    var content;
-    //Recordset.MoveFirst();
-    //    while(!Recordset.EOF)
-    //    {
-    //    content += "<b>fam</b><br> "+Recordset.fields(1).value;
-    //    Recordset.MoveNext();
-    //    }
-    //Connection.close
-    //var fso = Server.createobject("scripting.filesystemobject");
-    //var path = Server.MapPath("templates/main.html");
-    //var file = fso.OpenTextFile(path);
-    //var text = file.ReadAll();
-
-
     var db = new sqlite3.Database('stud.s3db');
-    var content ="";
-    db.each("select * from students", function(err, row) {
-                content +="<b>имя</b> "+row.firstname + "<br>";
-            },function(){
-                var text = fs.readFileSync('templates/main.html');
-                text =" "+ text;
-                var compiled = dust.compile(text, "main");
-                //    console.log(compiled);
-                dust.loadSource(compiled);
-                dust.render("main", {
-                                title: "Программирование в интернет",
-                                org:"БНТУ",
-                                about:"О проекте",
-                                contact:"Контакты",
-                                project:"Программирование в интернет",
-                                home:"Главная",
-                                content:content
-                            }, function(err, out) {
-                                //  Response.Write(out);
-                                response.writeHead(200, {"Content-Type": "text/html"});
-                                response.write(out);
-                                response.end();
-                                //                    console.log("render ok ");
-                            });
+    resp = response;
+
+
+    db.each("select MAX(numlab) from labs", function(err, row) {
+                var conutLab = 0;
+                  for (var i in row) // обращение к свойствам объекта по индексу
+                      conutLab = row[i] ;
+
+                  for(var index = 1;index<=conutLab;index++)
+                  {
+                      content += "лаба "+ index +"<br>";
+                       var db2 = new sqlite3.Database('stud.s3db');
+                      db2.all("select link,name,idteam from labs where numlab = "+index, function(err2, row2) {
+                                  row2.forEach(function (row3) {
+
+                                   content += " "+row3.link+" "+ row3.name+"<br>";
+                                   console.log(" "+row3.link+" "+ row3.name+"<br>");
+                                               });
+                                  rend();
+                               ///);
+                      db2.close();
+                              });
+                  }
             });
     db.close();
 
 }
+function rend(){
+    if(opCount>0)
+    {
+        console.log("ok" + opCount); opCount++
+                        var text = fs.readFileSync('templates/main.html');
+                        text =" "+ text;
+                        var compiled = dust.compile(text, "main");
+                        //    console.log(compiled);
+                        dust.loadSource(compiled);
+                        dust.render("main", {
+                                        title: "Программирование в интернет",
+                                        org:"БНТУ",
+                                        about:"О проекте",
+                                        contact:"Контакты",
+                                        project:"Программирование в интернет",
+                                        home:"Главная",
+                                        content:content
+                                    }, function(err, out) {
+                                        //  Response.Write(out);
+                                        resp.writeHead(200, {"Content-Type": "text/html"});
+                                        resp.write(out);
+                                        resp.end();
+                                        //                    console.log("render ok ");
+                                    });
+    }
+    else
+    {console.log("not" + opCount); opCount++}
+
+
+            }
 function contact(response) {
 
     var content ="Котнакты";
@@ -96,15 +106,13 @@ function about(response) {
                     org:"БНТУ",
                     about:"О проекте",
                     contact:"Контакты",
-                    project:"Контакты",
+                    project:"О проекте",
                     home:"Главная",
                     content:content
                 }, function(err, out) {
-                    //  Response.Write(out);
                     response.writeHead(200, {"Content-Type": "text/html"});
                     response.write(out);
                     response.end();
-                    //                    console.log("render ok ");
                 });
 
 

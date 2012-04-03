@@ -10,13 +10,26 @@ Connection.Open();
 //Connection.execute("INSERT INTO tblAdrs Values( 1, 'Abel' )");
 
 
-var Recordset = Connection.Execute("select * from students");
-    var content;
-Recordset.MoveFirst();
-    while(!Recordset.EOF)
+var Recordset1 = Connection.Execute("select numlab from labs group by numlab");
+    var content="";
+    Recordset1.MoveFirst();
+    while(!Recordset1.EOF)
     {
-    content += "<b>fam</b><br> "+Recordset.fields(1).value;
-    Recordset.MoveNext();
+        content += "<b>num</b> "+Recordset1.fields(0).value+"<br>";
+        var Recordset2 = Connection.Execute("select link,name,idteam from labs where numlab ="+Recordset1.fields(0).value);
+        while(!Recordset2.EOF)
+        {   
+            content += "<b>link</b> "+Recordset2.fields(0).value+"<br>";
+            var Recordset3 = Connection.Execute("select firstname,lastname,'group' from students,teams where students.id =iduser AND idteam ="+Recordset2.fields(2).value);
+            while(!Recordset3.EOF)
+            {
+                content += "<b>fam</b> "+Recordset3.fields(0).value;
+                Recordset3.MoveNext();
+            }
+            content += "<br>";
+            Recordset2.MoveNext();
+        }
+        Recordset1.MoveNext();
     }
 
 
@@ -34,6 +47,7 @@ org:"БНТУ",
 about:"О проекте",
 contact:"Контакты",
 project:"Программирование в интернет",
+home:"Главная",
 content:content
 }, function(err, out) {
   Response.Write(out);
